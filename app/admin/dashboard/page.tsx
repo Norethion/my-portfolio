@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { AdminProtection } from "@/components/admin/AdminProtection";
+import { ProjectsManager } from "@/components/admin/ProjectsManager";
 import { Button } from "@/components/ui/button";
 import { useAdminStore } from "@/stores/useAdminStore";
 import { LogOut, User, Code, FileText } from "lucide-react";
@@ -14,6 +16,7 @@ import { LogOut, User, Code, FileText } from "lucide-react";
 function AdminDashboardContent() {
   const router = useRouter();
   const logout = useAdminStore((state) => state.logout);
+  const [activeTab, setActiveTab] = useState<string | null>(null);
 
   const handleLogout = () => {
     logout();
@@ -22,9 +25,18 @@ function AdminDashboardContent() {
 
   const tabs = [
     { id: "info", label: "Bilgilerim", icon: User, content: "Info management coming soon" },
-    { id: "projects", label: "Projeler", icon: Code, content: "Projects management coming soon" },
+    { id: "projects", label: "Projeler", icon: Code, content: "Projects management" },
     { id: "cv", label: "CV Bilgileri", icon: FileText, content: "CV data management coming soon" },
   ];
+
+  const handleTabClick = (tabId: string) => {
+    if (tabId === "projects") {
+      setActiveTab(activeTab === "projects" ? null : "projects");
+    } else {
+      setActiveTab(null);
+      // TODO: Implement other tabs
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -48,7 +60,10 @@ function AdminDashboardContent() {
             {tabs.map((tab) => (
               <div
                 key={tab.id}
-                className="group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:shadow-lg cursor-pointer"
+                onClick={() => handleTabClick(tab.id)}
+                className={`group relative overflow-hidden rounded-lg border border-border bg-card p-6 transition-all hover:shadow-lg cursor-pointer ${
+                  activeTab === tab.id ? "ring-2 ring-primary" : ""
+                }`}
               >
                 <div className="flex items-center gap-4">
                   <div className="rounded-full bg-secondary p-3">
@@ -64,6 +79,13 @@ function AdminDashboardContent() {
               </div>
             ))}
           </div>
+
+          {/* Projects Manager */}
+          {activeTab === "projects" && (
+            <div className="mt-8">
+              <ProjectsManager />
+            </div>
+          )}
         </div>
       </main>
     </div>

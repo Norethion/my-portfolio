@@ -54,14 +54,14 @@ export default function ProjectsPage() {
     const fetchRepos = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/github');
+        const response = await fetch('/api/projects');
         
         if (!response.ok) {
           throw new Error('Failed to fetch repositories');
         }
         
         const data = await response.json();
-        setRepos(data.repos || []);
+        setRepos(data.projects || []);
         setError(null);
       } catch (err) {
         console.error('Error fetching repositories:', err);
