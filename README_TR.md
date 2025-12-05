@@ -344,8 +344,7 @@ Detaylar için [LICENSE](LICENSE) dosyasına bakın.
 
 **Norethion**
 
-- 🌐 [Portföy](https://your-portfolio.vercel.app)
-- 💼 [LinkedIn](https://www.linkedin.com/in/yourprofile)
+- 💼 [LinkedIn](https://www.linkedin.com/in/ali-enes-aydemir-42207a229/)
 - 🐙 [GitHub](https://github.com/Norethion)
 
 ---

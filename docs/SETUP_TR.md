@@ -131,25 +131,7 @@ Root dizinde `.env.local` dosyası oluşturun:
 DATABASE_URL=postgresql://postgres:password@localhost:5432/portfolio
 
 # ===========================================
-# ADMIN KİMLİK DOĞRULAMA
-# ===========================================
-
-# Admin panel şifresi (bunu değiştirin!)
-NEXT_PUBLIC_ADMIN_KEY=guvenli-admin-sifreniz-buraya
-
-# ===========================================
-# GİTHUB ENTEGRASYONU (Opsiyonel)
-# ===========================================
-
-# Proje senkronizasyonu için GitHub kullanıcı adınız
-GITHUB_USERNAME=github-kullanici-adiniz
-
-# GitHub Personal Access Token (opsiyonel, ama önerilir)
-# Al: https://github.com/settings/tokens
-GITHUB_TOKEN=ghp_token_buraya
-
-# ===========================================
-# SUPABASE (Opsiyonel - gelişmiş özellikler için)
+# SUPABASE (Opsiyonel - production için)
 # ===========================================
 
 NEXT_PUBLIC_SUPABASE_URL=supabase-url
@@ -163,15 +145,28 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=supabase-anon-key
 DEBUG=true
 ```
 
-**Önemli Güvenlik Notları:**
+### **Adım 4: Veritabanı ve Admin Kurulumu**
 
-🔒 **Güvenlik İpuçları:**
-- `.env.local`'i asla Git'e commit etmeyin
-- Güçlü şifreler kullanın (16+ karakter)
-- Şifreleri düzenli olarak değiştirin
-- Dev/staging/prod için farklı şifreler
+1. **Veritabanını oluşturun:**
+```bash
+createdb portfolio
+```
 
-### **Adım 4: PostgreSQL Veritabanı Kurulumu**
+2. **Tabloları oluşturun:**
+```bash
+npx drizzle-kit push
+```
+
+3. **Admin Şifresi ve GitHub Ayarları:**
+Bu adımda admin şifrenizi ve GitHub kullanıcı adınızı veritabanına kaydedeceksiniz:
+```bash
+npm run setup
+```
+Terminaldeki yönergeleri izleyin.
+
+### **Adım 4: PostgreSQL Kurulumu**
+
+Eğer bilgisayarınızda PostgreSQL yüklü değilse:
 
 #### **Seçenek A: Yerel Yükleme**
 
@@ -210,57 +205,26 @@ docker run --name portfolio-db \
 docker exec -it portfolio-db psql -U postgres -d portfolio
 ```
 
-#### **Veritabanı Oluşturma**
+### **Adım 5: Veritabanı ve Admin Kurulumu**
 
+Veritabanı servisi çalıştıktan sonra sırasıyla:
+
+1. **Veritabanını oluşturun:**
 ```bash
-# psql komut satırını kullanarak
 createdb portfolio
-
-# Veya psql interaktif kullanarak
-psql -U postgres
-CREATE DATABASE portfolio;
-\q
-
-# Veya pgAdmin/DBeaver GUI kullanarak
-# "portfolio" adında veritabanı oluşturun
 ```
 
-**Veritabanı Bağlantısını Doğrulama:**
-
+2. **Tabloları oluşturun:**
 ```bash
-psql -d portfolio -c "SELECT version();"
-```
-
-### **Adım 5: Veritabanı Migration**
-
-**Drizzle ORM Kullanarak:**
-
-```bash
-# Şemayı doğrudan push edin (geliştirme için önerilir)
 npx drizzle-kit push
-
-# Veya migration oluştur ve çalıştır
-npx drizzle-kit generate
-npx drizzle-kit migrate
-
-# Veya Drizzle Studio'yu açın (görsel editör)
-npx drizzle-kit studio
 ```
 
-**Beklenen Çıktı:**
-
-```
-✓ Pushed migration successfully!
-```
-
-**Tabloları Doğrulama:**
-
+3. **Admin Şifresi ve GitHub Ayarları:**
+Bu adımda admin şifrenizi ve GitHub kullanıcı adınızı veritabanına kaydedeceksiniz:
 ```bash
-psql -d portfolio -c "\dt"
-
-# Göstermeli:
-# personal_info, projects, cv_experiences, cv_education, cv_skills, settings
+npm run setup
 ```
+Terminaldeki yönergeleri izleyin.
 
 ### **Adım 6: Geliştirme Sunucusunu Başlatma**
 
@@ -357,12 +321,15 @@ export default {
 
 ### **Admin Şifresi**
 
-**Şifre Ayarlama:**
+Admin şifresini **Adım 5**'te `npm run setup` komutu ile belirlediniz.
 
-```env
-# .env.local içinde
-NEXT_PUBLIC_ADMIN_KEY=guvenli-sifreniz-buraya
+**Şifreyi Değiştirmek İsterseniz:**
+
+Terminalden tekrar şu komutu çalıştırabilirsiniz:
+```bash
+npm run setup
 ```
+VEYA veritabanındaki `settings` tablosundan `admin_password` değerini manuel olarak güncelleyebilirsiniz.
 
 **Güvenlik Önerileri:**
 

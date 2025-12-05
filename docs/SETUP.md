@@ -131,24 +131,6 @@ Create a `.env.local` file in the root directory:
 DATABASE_URL=postgresql://postgres:password@localhost:5432/portfolio
 
 # ===========================================
-# ADMIN AUTHENTICATION
-# ===========================================
-
-# Admin panel password (change this!)
-NEXT_PUBLIC_ADMIN_KEY=your-secure-admin-password-here
-
-# ===========================================
-# GITHUB INTEGRATION (Optional)
-# ===========================================
-
-# Your GitHub username for project sync
-GITHUB_USERNAME=your-github-username
-
-# GitHub Personal Access Token (optional, but recommended)
-# Get from: https://github.com/settings/tokens
-GITHUB_TOKEN=ghp_your_token_here
-
-# ===========================================
 # SUPABASE (Optional - for advanced features)
 # ===========================================
 
@@ -163,15 +145,28 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 DEBUG=true
 ```
 
-**Important Security Notes:**
+### **Step 4: Database & Admin Setup**
 
-🔒 **Security Tips:**
-- Never commit `.env.local` to Git
-- Use strong passwords (16+ characters)
-- Rotate passwords regularly
-- Different passwords for dev/staging/prod
+1. **Create the database:**
+```bash
+createdb portfolio
+```
 
-### **Step 4: PostgreSQL Database Setup**
+2. **Create tables:**
+```bash
+npx drizzle-kit push
+```
+
+3. **Admin Password & GitHub Setup:**
+Run this script to set your admin password and GitHub username in the database:
+```bash
+npm run setup
+```
+Follow the prompts in the terminal.
+
+### **Step 4: PostgreSQL Installation**
+
+If PostgreSQL is not installed on your machine:
 
 #### **Option A: Local Installation**
 
@@ -210,57 +205,26 @@ docker run --name portfolio-db \
 docker exec -it portfolio-db psql -U postgres -d portfolio
 ```
 
-#### **Create Database**
+### **Step 5: Database & Admin Setup**
 
+Once PostgreSQL service is running:
+
+1. **Create the database:**
 ```bash
-# Using psql command line
 createdb portfolio
-
-# Or using psql interactive
-psql -U postgres
-CREATE DATABASE portfolio;
-\q
-
-# Or using pgAdmin/DBeaver GUI
-# Create database named "portfolio"
 ```
 
-**Verify Database Connection:**
-
+2. **Create tables:**
 ```bash
-psql -d portfolio -c "SELECT version();"
-```
-
-### **Step 5: Database Migration**
-
-**Using Drizzle ORM:**
-
-```bash
-# Push schema directly (recommended for development)
 npx drizzle-kit push
-
-# Or generate and run migrations
-npx drizzle-kit generate
-npx drizzle-kit migrate
-
-# Or open Drizzle Studio (visual editor)
-npx drizzle-kit studio
 ```
 
-**Expected Output:**
-
-```
-✓ Pushed migration successfully!
-```
-
-**Verify Tables:**
-
+3. **Admin Password & GitHub Setup:**
+Run this script to set your admin password and GitHub username in the database:
 ```bash
-psql -d portfolio -c "\dt"
-
-# Should show:
-# personal_info, projects, cv_experiences, cv_education, cv_skills, settings
+npm run setup
 ```
+Follow the prompts in the terminal.
 
 ### **Step 6: Start Development Server**
 
@@ -357,12 +321,15 @@ export default {
 
 ### **Admin Password**
 
-**Setting Password:**
+You set your admin password in **Step 5** using `npm run setup`.
 
-```env
-# In .env.local
-NEXT_PUBLIC_ADMIN_KEY=your-secure-password-here
+**To Change Password:**
+
+You can run the setup script again:
+```bash
+npm run setup
 ```
+OR manually update the `admin_password` value in the `settings` table of your database.
 
 **Security Recommendations:**
 

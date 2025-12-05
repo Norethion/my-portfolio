@@ -339,8 +339,7 @@ See [LICENSE](LICENSE) file for details.
 
 **Norethion**
 
-- 🌐 [Portfolio](https://your-portfolio.vercel.app)
-- 💼 [LinkedIn](https://www.linkedin.com/in/yourprofile)
+- 💼 [LinkedIn](https://www.linkedin.com/in/ali-enes-aydemir-42207a229/)
 - 🐙 [GitHub](https://github.com/Norethion)
 
 ---
