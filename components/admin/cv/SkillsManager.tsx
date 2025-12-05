@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -31,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLanguageStore } from "@/stores/useLanguageStore";
+import { useAdminStore } from "@/stores/useAdminStore";
 import { Badge } from "@/components/ui/badge";
 import { getTechColor } from "@/lib/utils/tech-colors";
 
@@ -143,6 +145,7 @@ export function SkillsManager() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
+  const token = useAdminStore((state) => state.token);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -211,14 +214,16 @@ export function SkillsManager() {
   const t = content[language];
 
   useEffect(() => {
-    fetchSkills();
+    if (token) {
+      fetchSkills();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [token]);
 
   const fetchSkills = async () => {
     try {
+      if (!token) return;
       setLoading(true);
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
       const response = await fetch("/api/admin/cv/skills", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -260,7 +265,7 @@ export function SkillsManager() {
       setSkills(newSkills);
 
       try {
-        const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+        if (!token) throw new Error("Unauthorized");
         const response = await fetch("/api/admin/cv/skills/reorder", {
           method: "PUT",
           headers: {
@@ -293,7 +298,7 @@ export function SkillsManager() {
     setSkills(newSkills);
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch("/api/admin/cv/skills/reorder", {
         method: "PUT",
         headers: {
@@ -324,7 +329,7 @@ export function SkillsManager() {
     if (!confirm(t.deleteConfirm)) return;
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch(`/api/admin/cv/skills/${id}`, {
         method: "DELETE",
         headers: {
@@ -379,7 +384,7 @@ export function SkillsManager() {
     setSkills(updatedSkills);
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch("/api/admin/cv/skills/reorder", {
         method: "PUT",
         headers: {
@@ -413,8 +418,25 @@ export function SkillsManager() {
 
   if (loading) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        {t.loading}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <div key={i} className="h-full rounded-xl border bg-card text-card-foreground shadow">
+            <div className="p-3 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-4 w-4" />
+                <div className="flex-1 flex gap-2">
+                  <Skeleton className="h-5 w-20" />
+                  <Skeleton className="h-5 w-16" />
+                  <Skeleton className="h-5 w-16" />
+                </div>
+                <div className="flex gap-1">
+                  <Skeleton className="h-8 w-8" />
+                  <Skeleton className="h-8 w-8" />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

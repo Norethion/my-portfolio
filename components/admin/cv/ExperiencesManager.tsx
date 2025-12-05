@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -24,6 +25,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Plus, GripVertical, Edit, Trash2, Building2, MapPin } from "lucide-react";
 import { useLanguageStore } from "@/stores/useLanguageStore";
+import { useAdminStore } from "@/stores/useAdminStore";
 import { Badge } from "@/components/ui/badge";
 
 interface Experience {
@@ -146,6 +148,7 @@ export function ExperiencesManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
+  const token = useAdminStore((state) => state.token);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -190,14 +193,16 @@ export function ExperiencesManager() {
   const t = content[language];
 
   useEffect(() => {
-    fetchExperiences();
+    if (token) {
+      fetchExperiences();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [token]);
 
   const fetchExperiences = async () => {
     try {
+      if (!token) return;
       setLoading(true);
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
       const response = await fetch("/api/admin/cv/experiences", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -228,7 +233,7 @@ export function ExperiencesManager() {
     setExperiences(newExperiences);
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch("/api/admin/cv/experiences/reorder", {
         method: "PUT",
         headers: {
@@ -259,7 +264,7 @@ export function ExperiencesManager() {
     if (!confirm(t.deleteConfirm)) return;
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch(`/api/admin/cv/experiences/${id}`, {
         method: "DELETE",
         headers: {
@@ -284,8 +289,22 @@ export function ExperiencesManager() {
 
   if (loading) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        {t.loading}
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="mb-2 rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="p-4 flex items-center gap-3">
+              <Skeleton className="h-4 w-4" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-4 w-1/4" />
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-8" />
+                <Skeleton className="h-8 w-8" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

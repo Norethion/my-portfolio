@@ -10,6 +10,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Save } from "lucide-react";
 import { useLanguageStore } from "@/stores/useLanguageStore";
+import { useAdminStore } from "@/stores/useAdminStore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PersonalInfo {
   id: number | null;
@@ -46,8 +48,10 @@ export function PersonalInfoEditor() {
     avatar: "",
   });
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
+  const token = useAdminStore((state) => state.token);
 
   const content = {
     tr: {
@@ -95,25 +99,28 @@ export function PersonalInfoEditor() {
   const t = content[language];
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (token) {
+      fetchData();
+    }
+  }, [token]);
 
   const fetchData = async () => {
     try {
-      // Use admin endpoint to get fresh data without cache
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) return;
+
       const response = await fetch("/api/admin/personal-info", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch personal info");
       }
-      
-      const info = await response.json();
-      
+
+      const responseData = await response.json();
+      const info = responseData.data;
+
       // Convert null values to empty strings for controlled inputs
       setData({
         id: info.id || null,
@@ -133,6 +140,8 @@ export function PersonalInfoEditor() {
       });
     } catch (error) {
       console.error("Error fetching personal info:", error);
+    } finally {
+      setInitialLoading(false);
     }
   };
 
@@ -141,7 +150,8 @@ export function PersonalInfoEditor() {
     setLoading(true);
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
+
       const response = await fetch("/api/admin/personal-info", {
         method: "PUT",
         headers: {
@@ -169,6 +179,41 @@ export function PersonalInfoEditor() {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-8 w-1/3 mb-2" />
+          <Skeleton className="h-4 w-1/2" />
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-24 w-full" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -314,7 +359,7 @@ export function PersonalInfoEditor() {
               value={data.avatar}
               onChange={(base64) => setData({ ...data, avatar: base64 })}
               accept="image/png,image/jpeg,image/jpg,image/webp"
-              maxSize={2}
+              maxSize={25}
             />
           </div>
 

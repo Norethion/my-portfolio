@@ -1,6 +1,7 @@
-import type { NewProject } from "@/lib/db/schema";
+import { SettingsService } from "./settings.service";
 import { InternalServerError } from "@/lib/errors/api-error";
 import { BaseService } from "./base.service";
+import type { NewProject } from "@/lib/db/schema";
 
 /**
  * Interface for GitHub repository data
@@ -29,10 +30,12 @@ export class GitHubService extends BaseService {
   async fetchRepositories(): Promise<GitHubRepo[]> {
     this.log("fetchRepositories");
 
-    const githubUsername = process.env.GITHUB_USERNAME;
-    
+    const settingsService = new SettingsService();
+    const usernameSetting = await settingsService.getSetting("github_username");
+    const githubUsername = usernameSetting?.value;
+
     if (!githubUsername) {
-      throw new InternalServerError("GITHUB_USERNAME environment variable is required");
+      throw new InternalServerError("GitHub Username is not set in database");
     }
 
     const response = await fetch(
@@ -52,7 +55,7 @@ export class GitHubService extends BaseService {
     }
 
     const repos = await response.json() as GitHubRepo[];
-    
+
     // Filter only public, non-fork repositories
     return repos.filter((repo) => repo.private === false && !repo.fork);
   }
@@ -75,4 +78,3 @@ export class GitHubService extends BaseService {
     };
   }
 }
-

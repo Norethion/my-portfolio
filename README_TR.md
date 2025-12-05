@@ -111,24 +111,6 @@ Root dizininde `.env.local` dosyası oluşturun:
 ```env
 # Veritabanı (Yerel PostgreSQL)
 DATABASE_URL=postgresql://postgres:password@localhost:5432/portfolio
-
-# Admin Kimlik Doğrulama
-NEXT_PUBLIC_ADMIN_KEY=güvenli-admin-sifreniz-buraya
-
-# GitHub Entegrasyonu (Opsiyonel)
-GITHUB_USERNAME=github-kullanici-adiniz
-GITHUB_TOKEN=ghp_token_buraya
-
-# Supabase (Opsiyonel - production için)
-NEXT_PUBLIC_SUPABASE_URL=supabase-url-niz
-NEXT_PUBLIC_SUPABASE_ANON_KEY=supabase-anon-key-niz
-```
-
-4. **PostgreSQL veritabanını kurun:**
-```bash
-# Veritabanı oluştur
-createdb portfolio
-
 # Migration'ları çalıştır
 npx drizzle-kit push
 

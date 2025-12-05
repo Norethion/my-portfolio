@@ -33,7 +33,6 @@ import {
   Edit,
   Trash2,
   RefreshCw,
-  Settings,
   X,
 } from "lucide-react";
 import {
@@ -44,8 +43,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLanguageStore } from "@/stores/useLanguageStore";
-import { CacheSettingsDialog } from "./CacheSettingsDialog";
+import { useAdminStore } from "@/stores/useAdminStore";
 import { getTechColor } from "@/lib/utils/tech-colors";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Project {
   id: number;
@@ -85,7 +85,7 @@ function ProjectCard({
     transform,
     transition,
     isDragging,
-  } = useSortable({ 
+  } = useSortable({
     id: project.id,
     animateLayoutChanges: () => true,
   });
@@ -240,6 +240,7 @@ export function ProjectsManager() {
   const [visibilityFilter, setVisibilityFilter] = useState<"all" | "visible" | "hidden">("visible");
   const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
+  const token = useAdminStore((state) => state.token);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -306,15 +307,22 @@ export function ProjectsManager() {
   const t = content[language];
 
   useEffect(() => {
-    fetchProjects();
-    fetchSyncSettings();
+    if (token) {
+      fetchProjects();
+      fetchSyncSettings();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [token]);
 
   const fetchProjects = async () => {
     try {
+      if (!token) return;
       setLoading(true);
-      const response = await fetch("/api/admin/projects");
+      const response = await fetch("/api/admin/projects", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       setProjects(data.projects || []);
     } catch (error) {
@@ -330,7 +338,12 @@ export function ProjectsManager() {
 
   const fetchSyncSettings = async () => {
     try {
-      const response = await fetch("/api/admin/projects/settings");
+      if (!token) return;
+      const response = await fetch("/api/admin/projects/settings", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       setSyncSettings(data);
     } catch (error) {
@@ -341,7 +354,7 @@ export function ProjectsManager() {
   const handleSync = async () => {
     setSyncing(true);
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch("/api/admin/projects/sync", {
         method: "POST",
         headers: {
@@ -376,12 +389,12 @@ export function ProjectsManager() {
     if (!over || active.id === over.id) return;
 
     // Filtrelenmiş liste üzerinde indeksleri bul
-    const filteredList = 
+    const filteredList =
       visibilityFilter === "all"
         ? projects
         : visibilityFilter === "visible"
-        ? projects.filter((p) => p.isVisible)
-        : projects.filter((p) => !p.isVisible);
+          ? projects.filter((p) => p.isVisible)
+          : projects.filter((p) => !p.isVisible);
 
     const oldFilteredIndex = filteredList.findIndex((p) => p.id === active.id);
     const newFilteredIndex = filteredList.findIndex((p) => p.id === over.id);
@@ -390,16 +403,16 @@ export function ProjectsManager() {
     if (visibilityFilter !== "all") {
       const oldProject = filteredList[oldFilteredIndex];
       const newProject = filteredList[newFilteredIndex];
-      
+
       const oldGlobalIndex = projects.findIndex((p) => p.id === oldProject.id);
       const newGlobalIndex = projects.findIndex((p) => p.id === newProject.id);
-      
+
       const newProjects = arrayMove(projects, oldGlobalIndex, newGlobalIndex);
-      
+
       setProjects(newProjects);
-      
+
       try {
-        const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+        if (!token) throw new Error("Unauthorized");
         const response = await fetch("/api/admin/projects/reorder", {
           method: "PUT",
           headers: {
@@ -436,7 +449,7 @@ export function ProjectsManager() {
     setProjects(newProjects);
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch("/api/admin/projects/reorder", {
         method: "PUT",
         headers: {
@@ -471,8 +484,8 @@ export function ProjectsManager() {
     if (!project) return;
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
-      const response = await fetch(`/api/admin/projects/${id}/visibility`, {
+      if (!token) throw new Error("Unauthorized");
+      const response = await fetch(`/api/admin/projects/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -503,7 +516,7 @@ export function ProjectsManager() {
     if (!confirm(t.deleteConfirm)) return;
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch(`/api/admin/projects/${id}`, {
         method: "DELETE",
         headers: {
@@ -537,12 +550,12 @@ export function ProjectsManager() {
   };
 
   // Filtrelenmiş projeleri hesapla
-  const filteredProjects = 
+  const filteredProjects =
     visibilityFilter === "all"
       ? projects
       : visibilityFilter === "visible"
-      ? projects.filter((p) => p.isVisible)
-      : projects.filter((p) => !p.isVisible);
+        ? projects.filter((p) => p.isVisible)
+        : projects.filter((p) => !p.isVisible);
 
   return (
     <div className="space-y-4">
@@ -555,15 +568,12 @@ export function ProjectsManager() {
                 {t.subtitle}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSettingsDialogOpen(true)}
-                title={t.settings}
-              >
-                <Settings className="h-4 w-4" />
-              </Button>
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-xs text-muted-foreground hidden sm:inline-block mr-2">
+                {language === "tr"
+                  ? "Otomatik senkronizasyon: Her gece 00:00"
+                  : "Auto-sync: Every night at 00:00"}
+              </span>
               <Button
                 variant="outline"
                 onClick={handleSync}
@@ -588,8 +598,27 @@ export function ProjectsManager() {
       </Card>
 
       {loading ? (
-        <div className="text-center py-8 text-muted-foreground">
-          Loading...
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-full rounded-xl border bg-card text-card-foreground shadow">
+              <div className="p-3 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-5 w-3/4" />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-4 w-4" />
+                </div>
+                <div className="flex gap-1">
+                  <Skeleton className="h-5 w-16 rounded-md" />
+                  <Skeleton className="h-5 w-16 rounded-md" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : projects.length === 0 ? (
         <Card>
@@ -632,8 +661,8 @@ export function ProjectsManager() {
                 {visibilityFilter === "visible"
                   ? t.noVisibleProjects
                   : visibilityFilter === "hidden"
-                  ? t.noHiddenProjects
-                  : t.noProjects}
+                    ? t.noHiddenProjects
+                    : t.noProjects}
               </CardContent>
             </Card>
           ) : (
@@ -674,13 +703,6 @@ export function ProjectsManager() {
         }}
         project={editingProject}
         onSuccess={fetchProjects}
-      />
-
-      <CacheSettingsDialog
-        open={settingsDialogOpen}
-        onOpenChange={setSettingsDialogOpen}
-        currentDuration={syncSettings?.cacheDuration || 3600000}
-        onSuccess={fetchSyncSettings}
       />
     </div>
   );

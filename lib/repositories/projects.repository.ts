@@ -36,7 +36,7 @@ export class ProjectsRepository extends BaseRepository {
       .from(projects)
       .where(eq(projects.id, id))
       .limit(1);
-    
+
     return result[0] || null;
   }
 
@@ -49,7 +49,7 @@ export class ProjectsRepository extends BaseRepository {
       .from(projects)
       .where(eq(projects.githubId, githubId))
       .limit(1);
-    
+
     return result[0] || null;
   }
 
@@ -139,7 +139,7 @@ export class ProjectsRepository extends BaseRepository {
       .from(projects)
       .orderBy(projects.order)
       .limit(1);
-    
+
     return result.length > 0 ? result[0].order + 1 : 0;
   }
 
@@ -149,19 +149,22 @@ export class ProjectsRepository extends BaseRepository {
   async upsertGitHubProjects(projectsData: Array<Omit<Partial<NewProject>, "order">>): Promise<void> {
     await db.transaction(async (tx) => {
       for (const projectData of projectsData) {
-        const existing = projectData.githubId 
+        const existing = projectData.githubId
           ? await tx
-              .select()
-              .from(projects)
-              .where(eq(projects.githubId, projectData.githubId))
-              .limit(1)
+            .select()
+            .from(projects)
+            .where(eq(projects.githubId, projectData.githubId))
+            .limit(1)
           : [];
 
         if (existing.length > 0) {
+          // Preserve exising visibility and custom description
+          const { isVisible, customDescription, ...updateData } = projectData;
+
           await tx
             .update(projects)
             .set({
-              ...projectData,
+              ...updateData,
               updatedAt: new Date(),
             })
             .where(eq(projects.id, existing[0].id));
@@ -172,9 +175,9 @@ export class ProjectsRepository extends BaseRepository {
             .from(projects)
             .orderBy(projects.order)
             .limit(1);
-          
+
           const nextOrder = maxOrderResult.length > 0 ? maxOrderResult[0].order + 1 : 0;
-          
+
           await tx.insert(projects).values({
             ...projectData,
             order: nextOrder,

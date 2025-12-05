@@ -9,12 +9,16 @@ import { NextResponse } from "next/server";
 import { CVService } from "@/lib/services/cv.service";
 import { handleApiError, errorResponse } from "@/lib/errors/error-handler";
 
+import { verifyAdmin, unauthorizedResponse } from "@/lib/auth/admin-auth";
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ section: string; id: string }> }
 ) {
-  const { section, id } = await params;
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
+    const { section, id } = await params;
     const body = await request.json();
     const service = new CVService();
 
@@ -39,8 +43,10 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ section: string; id: string }> }
 ) {
-  const { section, id } = await params;
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
+    const { section, id } = await params;
     const service = new CVService();
 
     if (section === "experiences") {

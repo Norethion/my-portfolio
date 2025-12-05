@@ -14,8 +14,12 @@ import {
   validateLinkedInCSV,
 } from "@/lib/utils/linkedin-parser";
 
+import { verifyAdmin, unauthorizedResponse } from "@/lib/auth/admin-auth";
+
 export async function POST(request: Request) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const body = await request.json();
     const { jsonData, isCSV } = body;
 

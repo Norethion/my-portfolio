@@ -9,15 +9,18 @@ import { NextResponse } from "next/server";
 import { SettingsService } from "@/lib/services/settings.service";
 import { handleApiError } from "@/lib/errors/error-handler";
 
-export async function GET() {
+import { verifyAdmin, unauthorizedResponse } from "@/lib/auth/admin-auth";
+
+export async function GET(request: Request) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const service = new SettingsService();
-    
-    const cacheDuration = await service.getOrCreateSetting("github_cache_duration", "3600000");
+
+    // Only return lastSync, cache logic is deprecated
     const lastSync = await service.getOrCreateSetting("last_github_sync", new Date(0).toISOString());
 
     return NextResponse.json({
-      cacheDuration: parseInt(cacheDuration.value),
       lastSync: lastSync.value,
     });
   } catch (error) {
@@ -26,13 +29,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  try {
-    const body = await request.json();
-    const service = new SettingsService();
-    await service.setSetting("github_cache_duration", body.cacheDuration.toString());
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return handleApiError(error);
-  }
+  // Settings update is disabled as we moved to Cron
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
 }
 

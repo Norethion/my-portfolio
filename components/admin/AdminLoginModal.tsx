@@ -45,18 +45,29 @@ export function AdminLoginModal({ open, onOpenChange }: AdminLoginModalProps) {
 
   const t = content[language];
 
-  const handleLogin = () => {
-    const adminKey = process.env.NEXT_PUBLIC_ADMIN_KEY;
-    
-    if (password === adminKey) {
-      login();
-      setError("");
-      setPassword("");
-      onOpenChange(false);
-      router.push("/admin/dashboard");
-    } else {
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        login(data.token);
+        setError("");
+        setPassword("");
+        onOpenChange(false);
+        router.push("/admin/dashboard");
+      } else {
+        setError(data.error || t.error);
+        setPassword("");
+      }
+    } catch (e) {
       setError(t.error);
-      setPassword("");
+      console.error(e);
     }
   };
 

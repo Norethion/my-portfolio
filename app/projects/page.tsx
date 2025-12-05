@@ -1,5 +1,7 @@
 "use client";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 import { Navbar } from "@/components/layout/Navbar";
 import { useLanguageStore } from "@/stores/useLanguageStore";
 import { ExternalLink, Github, ChevronDown, ChevronUp } from "lucide-react";
@@ -62,11 +64,11 @@ export default function ProjectsPage() {
       try {
         setLoading(true);
         const response = await fetch('/api/projects');
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch projects');
         }
-        
+
         const data = await response.json();
         setProjects(data.projects || []);
         setError(null);
@@ -118,10 +120,27 @@ export default function ProjectsPage() {
             <h1 className="text-3xl sm:text-4xl font-bold">{t.title}</h1>
             <p className="text-muted-foreground text-sm sm:text-base">{t.description}</p>
           </div>
-          
+
           {loading ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">{t.loading}</p>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="rounded-lg border border-border bg-card p-6 h-[280px] flex flex-col">
+                  <Skeleton className="h-6 w-3/4 mb-4" />
+                  <div className="space-y-2 mb-4 flex-1">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
+                  <div className="flex gap-2 mb-4">
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-16 rounded-full" />
+                  </div>
+                  <div className="flex gap-2 mt-auto">
+                    <Skeleton className="h-9 w-32" />
+                    <Skeleton className="h-9 w-32" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : error ? (
             <div className="text-center py-12">
@@ -138,7 +157,7 @@ export default function ProjectsPage() {
                 const isExpanded = expandedProjects.has(project.id);
                 const shouldShowToggle = needsTruncation(project.description);
                 const description = project.description || "";
-                
+
                 return (
                   <div
                     key={project.id}

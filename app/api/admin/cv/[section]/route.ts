@@ -9,11 +9,15 @@ import { NextResponse } from "next/server";
 import { CVService } from "@/lib/services/cv.service";
 import { handleApiError, errorResponse } from "@/lib/errors/error-handler";
 
+import { verifyAdmin, unauthorizedResponse } from "@/lib/auth/admin-auth";
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ section: string }> }
 ) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const { section } = await params;
     const service = new CVService();
 
@@ -39,6 +43,8 @@ export async function POST(
   { params }: { params: Promise<{ section: string }> }
 ) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const { section } = await params;
     const body = await request.json();
     const service = new CVService();

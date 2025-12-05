@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLanguageStore } from "@/stores/useLanguageStore";
+import { useAdminStore } from "@/stores/useAdminStore";
 
 interface Experience {
   id?: number;
@@ -60,6 +61,7 @@ export function ExperienceDialog({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
+  const token = useAdminStore((state) => state.token);
 
   const content = {
     tr: {
@@ -175,7 +177,7 @@ export function ExperienceDialog({
     setLoading(true);
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
 
       if (experience?.id) {
         // Update existing experience

@@ -8,8 +8,12 @@ import { NextResponse } from "next/server";
 import { ProjectsService } from "@/lib/services/projects.service";
 import { handleApiError } from "@/lib/errors/error-handler";
 
+import { verifyAdmin, unauthorizedResponse } from "@/lib/auth/admin-auth";
+
 export async function PUT(request: Request) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const body = await request.json();
     const service = new ProjectsService();
     await service.reorderProjects(body.items);

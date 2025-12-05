@@ -9,8 +9,12 @@ import { NextResponse } from "next/server";
 import { ProjectsService } from "@/lib/services/projects.service";
 import { handleApiError } from "@/lib/errors/error-handler";
 
-export async function GET() {
+import { verifyAdmin, unauthorizedResponse } from "@/lib/auth/admin-auth";
+
+export async function GET(request: Request) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const service = new ProjectsService();
     const projects = await service.getAllProjects();
     return NextResponse.json({ projects });
@@ -21,6 +25,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const body = await request.json();
     const service = new ProjectsService();
     const project = await service.createManualProject(body);

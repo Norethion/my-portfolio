@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Upload, Loader2, AlertCircle } from "lucide-react";
 import { useLanguageStore } from "@/stores/useLanguageStore";
+import { useAdminStore } from "@/stores/useAdminStore";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { validateLinkedInJSON, validateLinkedInCSV } from "@/lib/utils/linkedin-parser";
 import JSZip from "jszip";
@@ -34,6 +35,7 @@ export function LinkedInImportDialog({
   const [error, setError] = useState("");
   const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
+  const token = useAdminStore((state) => state.token);
 
   const content = {
     tr: {
@@ -83,12 +85,12 @@ export function LinkedInImportDialog({
       if (file.name.endsWith('.zip')) {
         const arrayBuffer = await file.arrayBuffer();
         const zip = await JSZip.loadAsync(arrayBuffer);
-        
+
         // Extract CSV files
         const positionsContent = await zip.file('Positions.csv')?.async('text');
         const educationContent = await zip.file('Education.csv')?.async('text');
         const skillsContent = await zip.file('Skills.csv')?.async('text');
-        
+
         if (!positionsContent && !educationContent && !skillsContent) {
           setError("ZIP dosyasında LinkedIn CSV dosyaları bulunamadı");
           setLoading(false);
@@ -101,14 +103,14 @@ export function LinkedInImportDialog({
           Education: educationContent || '',
           Skills: skillsContent || '',
         };
-        
+
         setJsonData(JSON.stringify(csvData));
         setLoading(false);
       } else if (file.name.endsWith('.csv')) {
         const reader = new FileReader();
         reader.onloadend = () => {
           const text = reader.result as string;
-          
+
           // Determine which CSV file it is based on header
           let csvType = 'Unknown';
           if (text.toLowerCase().includes('company name')) {
@@ -118,10 +120,10 @@ export function LinkedInImportDialog({
           } else if (text.toLowerCase().includes('name')) {
             csvType = 'Skills';
           }
-          
+
           const csvData: Record<string, string> = {};
           csvData[csvType] = text;
-          
+
           setJsonData(JSON.stringify(csvData));
           setError("");
           setLoading(false);
@@ -160,7 +162,7 @@ export function LinkedInImportDialog({
 
       // Check if it's CSV format (has Positions, Education, Skills as strings)
       // CSV format has these fields as raw CSV strings, JSON format has nested objects
-      const isCSVFormat = 
+      const isCSVFormat =
         (parsedData.Positions && typeof parsedData.Positions === 'string') ||
         (parsedData.Education && typeof parsedData.Education === 'string') ||
         (parsedData.Skills && typeof parsedData.Skills === 'string');
@@ -179,7 +181,7 @@ export function LinkedInImportDialog({
       }
 
       // Send to API
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
       const response = await fetch("/api/admin/cv/import", {
         method: "POST",
         headers: {

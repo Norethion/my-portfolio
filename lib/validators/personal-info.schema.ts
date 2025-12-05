@@ -6,25 +6,25 @@ import { z } from "zod";
  */
 export const personalInfoSchema = z.object({
   name: z.string().min(1, "Name is required").max(255, "Name too long"),
-  
+
   jobTitle: z
     .string()
     .max(255, "Job title too long")
     .optional()
     .nullable(),
-  
+
   bioTr: z
     .string()
     .max(2000, "Turkish bio too long")
     .optional()
     .nullable(),
-  
+
   bioEn: z
     .string()
     .max(2000, "English bio too long")
     .optional()
     .nullable(),
-  
+
   email: z
     .string()
     .email("Invalid email format")
@@ -32,13 +32,13 @@ export const personalInfoSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  
+
   phone: z
     .string()
     .max(50, "Phone too long")
     .optional()
     .nullable(),
-  
+
   github: z
     .string()
     .url("Invalid GitHub URL")
@@ -46,7 +46,7 @@ export const personalInfoSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  
+
   linkedin: z
     .string()
     .url("Invalid LinkedIn URL")
@@ -54,7 +54,7 @@ export const personalInfoSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  
+
   twitter: z
     .string()
     .url("Invalid Twitter URL")
@@ -62,7 +62,7 @@ export const personalInfoSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  
+
   instagram: z
     .string()
     .url("Invalid Instagram URL")
@@ -70,7 +70,7 @@ export const personalInfoSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  
+
   facebook: z
     .string()
     .url("Invalid Facebook URL")
@@ -78,19 +78,19 @@ export const personalInfoSchema = z.object({
     .optional()
     .nullable()
     .or(z.literal("")),
-  
+
   location: z
     .string()
     .max(255, "Location too long")
     .optional()
     .nullable(),
-  
+
   avatar: z
     .string()
-    .max(10000, "Avatar data too large")
+    .max(50000000, "Avatar data too large") // ~37MB base64 for 25MB file
     .optional()
     .nullable(),
-  
+
   languages: z
     .string()
     .max(500, "Languages too long")

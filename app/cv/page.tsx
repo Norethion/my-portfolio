@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Navbar } from "@/components/layout/Navbar";
 import { Building2, MapPin, GraduationCap, Printer } from "lucide-react";
 import { useLanguageStore } from "@/stores/useLanguageStore";
@@ -153,8 +154,38 @@ export default function CVPage() {
       <div className="min-h-screen">
         <Navbar />
         <main className="container mx-auto px-4 pt-8 pb-16">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="text-muted-foreground">{t.loading}</p>
+          <div className="cv-container max-w-[210mm] mx-auto bg-white shadow-lg p-8">
+            <div className="mb-6 pb-4 border-b-2 border-gray-100">
+              <div className="flex gap-6">
+                <Skeleton className="w-24 h-24 rounded-full" />
+                <div className="flex-1 space-y-4">
+                  <Skeleton className="h-8 w-1/2" />
+                  <Skeleton className="h-6 w-1/3" />
+                </div>
+              </div>
+              <div className="mt-8 space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <Skeleton className="h-6 w-32 mb-4" />
+                <div className="space-y-4">
+                  <Skeleton className="h-20 w-full" />
+                  <Skeleton className="h-20 w-full" />
+                </div>
+              </div>
+              <div>
+                <Skeleton className="h-6 w-32 mb-4" />
+                <div className="space-y-4">
+                  <Skeleton className="h-16 w-full" />
+                  <Skeleton className="h-16 w-full" />
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -200,7 +231,7 @@ export default function CVPage() {
         </div>
 
         {/* CV Content - Professional Two-Column Layout */}
-        <div 
+        <div
           className="cv-container max-w-[210mm] mx-auto bg-white shadow-lg p-4 sm:p-8 text-black"
         >
           {/* Header Section */}
@@ -225,12 +256,12 @@ export default function CVPage() {
             {/* Bio Section - First Page (after header) */}
             {(() => {
               // Get bio based on current language
-              const bioText = language === "tr" 
+              const bioText = language === "tr"
                 ? (personalInfo.bioTr || "")
                 : (personalInfo.bioEn || "");
-              
+
               if (!bioText) return null;
-              
+
               return (
                 <div className="mt-4">
                   <h2 className="text-lg font-bold mb-3 uppercase border-b-2 border-gray-800 pb-1">
@@ -247,7 +278,7 @@ export default function CVPage() {
           {/* Languages Section */}
           {personalInfo.languages && (() => {
             try {
-              const languages = typeof personalInfo.languages === 'string' 
+              const languages = typeof personalInfo.languages === 'string'
                 ? JSON.parse(personalInfo.languages) as (LanguageItem | string)[]
                 : personalInfo.languages as (LanguageItem | string)[];
               if (Array.isArray(languages) && languages.length > 0) {
@@ -340,7 +371,7 @@ export default function CVPage() {
                       <div className="flex flex-wrap gap-1">
                         {categorySkills.map((skill) => {
                           const colors = getTechColor(skill.name);
-                          
+
                           // Map skill level to number of stars
                           const getStarCount = (level: string) => {
                             switch (level) {
@@ -356,10 +387,10 @@ export default function CVPage() {
                                 return 0;
                             }
                           };
-                          
+
                           const starCount = getStarCount(skill.level);
                           const maxStars = 4;
-                          
+
                           return (
                             <div key={skill.id} className="flex flex-col gap-0.5">
                               <span

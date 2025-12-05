@@ -133,3 +133,27 @@ export type NewCVSkill = typeof cvSkills.$inferInsert;
 export type Setting = typeof settings.$inferSelect;
 export type NewSetting = typeof settings.$inferInsert;
 
+// Messages Table
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  subject: varchar("subject", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type Message = typeof messages.$inferSelect;
+export type NewMessage = typeof messages.$inferInsert;
+
+// Visitor Stats Table
+export const visitorStats = pgTable("visitor_stats", {
+  date: varchar("date", { length: 15 }).primaryKey(), // YYYY-MM-DD
+  count: integer("count").default(0).notNull(),
+});
+
+export type VisitorStat = typeof visitorStats.$inferSelect;
+export type NewVisitorStat = typeof visitorStats.$inferInsert;
+

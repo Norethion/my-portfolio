@@ -106,29 +106,6 @@ yarn install
 pnpm install
 ```
 
-3. **Set up environment variables:**
-Create a `.env.local` file in the root directory:
-```env
-# Database (Local PostgreSQL)
-DATABASE_URL=postgresql://postgres:password@localhost:5432/portfolio
-
-# Admin Authentication
-NEXT_PUBLIC_ADMIN_KEY=your-secure-admin-password-here
-
-# GitHub Integration (Optional)
-GITHUB_USERNAME=your-github-username
-GITHUB_TOKEN=ghp_your_token_here
-
-# Supabase (Optional - for production)
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
-```
-
-4. **Set up PostgreSQL database:**
-```bash
-# Create database
-createdb portfolio
-
 # Run migrations
 npx drizzle-kit push
 

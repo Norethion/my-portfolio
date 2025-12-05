@@ -10,18 +10,18 @@ import { revalidatePath } from "next/cache";
 import { PersonalInfoService } from "@/lib/services/personal-info.service";
 import { handleApiError } from "@/lib/errors/error-handler";
 
+import { verifyAdmin, unauthorizedResponse } from "@/lib/auth/admin-auth";
+
 /**
  * GET endpoint for admin - returns data without cache
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const service = new PersonalInfoService();
     const info = await service.getAdminPersonalInfo();
-
-    // Return default empty data if no info exists
-    const defaultData = info || service.getDefaultPersonalInfo();
-    
-    return NextResponse.json(defaultData);
+    return NextResponse.json({ data: info });
   } catch (error) {
     return handleApiError(error);
   }
@@ -32,6 +32,8 @@ export async function GET() {
  */
 export async function PUT(request: Request) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const body = await request.json();
     const service = new PersonalInfoService();
     const result = await service.upsertPersonalInfo(body);

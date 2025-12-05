@@ -9,11 +9,15 @@ import { NextResponse } from "next/server";
 import { ProjectsService } from "@/lib/services/projects.service";
 import { handleApiError } from "@/lib/errors/error-handler";
 
+import { verifyAdmin, unauthorizedResponse } from "@/lib/auth/admin-auth";
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const { id } = await params;
     const body = await request.json();
     const service = new ProjectsService();
@@ -29,6 +33,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    if (!(await verifyAdmin(request))) return unauthorizedResponse();
+
     const { id } = await params;
     const service = new ProjectsService();
     await service.deleteProject(parseInt(id));

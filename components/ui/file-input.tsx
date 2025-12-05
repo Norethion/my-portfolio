@@ -25,6 +25,10 @@ export function FileInput({
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const language = useLanguageStore((state) => state.language);
 
+  React.useEffect(() => {
+    setPreview(value || null);
+  }, [value]);
+
   const content = {
     tr: {
       clickToSelect: "Tıklayarak resim seçin",

@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 import { useLanguageStore } from "@/stores/useLanguageStore";
+import { useAdminStore } from "@/stores/useAdminStore";
 
 interface Project {
   id?: number;
@@ -56,6 +57,7 @@ export function ProjectDialog({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
+  const token = useAdminStore((state) => state.token);
 
   const content = {
     tr: {
@@ -150,7 +152,7 @@ export function ProjectDialog({
     setLoading(true);
 
     try {
-      const token = process.env.NEXT_PUBLIC_ADMIN_KEY || "default-admin-key";
+      if (!token) throw new Error("Unauthorized");
 
       if (project?.id) {
         // Update existing project

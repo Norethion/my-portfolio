@@ -4,6 +4,10 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { AdminAccessHandler } from "@/components/admin/AdminAccessHandler";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { Toaster } from "@/components/ui/toaster";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { VisitorTracker } from "@/components/analytics/VisitorTracker";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700"],
@@ -38,9 +42,13 @@ export default function RootLayout({
       <body className={`${poppins.variable} font-sans antialiased`}>
         <ThemeProvider>
           {children}
+          <Analytics />
+          <SpeedInsights />
+          <VisitorTracker />
         </ThemeProvider>
         <AdminAccessHandler />
         <ScrollToTop />
+        <Toaster />
       </body>
     </html>
   );
