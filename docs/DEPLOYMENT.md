@@ -99,9 +99,21 @@ Two options:
 
 **Migration SQL:**
 ```sql
-CREATE TYPE "public"."skill_category" AS ENUM('Frontend', 'Backend', 'Mobile', 'Desktop', 'DevOps', 'Database', 'Tools', 'Other');
-CREATE TYPE "public"."skill_level" AS ENUM('Beginner', 'Intermediate', 'Advanced', 'Expert');
-CREATE TABLE "personal_info" (
+-- Enum Types (Won't error if exists)
+DO $$ BEGIN
+    CREATE TYPE "public"."skill_category" AS ENUM('Frontend', 'Backend', 'Mobile', 'Desktop', 'DevOps', 'Database', 'Tools', 'Other');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+DO $$ BEGIN
+    CREATE TYPE "public"."skill_level" AS ENUM('Beginner', 'Intermediate', 'Advanced', 'Expert');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Tables
+CREATE TABLE IF NOT EXISTS "personal_info" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"job_title" varchar(255),
@@ -120,7 +132,8 @@ CREATE TABLE "personal_info" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
-CREATE TABLE "projects" (
+
+CREATE TABLE IF NOT EXISTS "projects" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"github_id" integer UNIQUE,
 	"name" varchar(255) NOT NULL,
@@ -137,7 +150,8 @@ CREATE TABLE "projects" (
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
-CREATE TABLE "cv_experiences" (
+
+CREATE TABLE IF NOT EXISTS "cv_experiences" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"company" varchar(255) NOT NULL,
 	"position" varchar(255) NOT NULL,
@@ -150,7 +164,8 @@ CREATE TABLE "cv_experiences" (
 	"order" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
-CREATE TABLE "cv_education" (
+
+CREATE TABLE IF NOT EXISTS "cv_education" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"school" varchar(255) NOT NULL,
 	"degree" varchar(255) NOT NULL,
@@ -164,7 +179,8 @@ CREATE TABLE "cv_education" (
 	"order" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
-CREATE TABLE "cv_skills" (
+
+CREATE TABLE IF NOT EXISTS "cv_skills" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"category" varchar(50) NOT NULL,
@@ -172,11 +188,29 @@ CREATE TABLE "cv_skills" (
 	"order" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL
 );
-CREATE TABLE "settings" (
+
+CREATE TABLE IF NOT EXISTS "settings" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"key" varchar(255) UNIQUE NOT NULL,
 	"value" text NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+
+-- NEW TABLES
+CREATE TABLE IF NOT EXISTS "messages" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"email" varchar(255) NOT NULL,
+	"subject" varchar(255) NOT NULL,
+	"message" text NOT NULL,
+	"is_read" boolean DEFAULT false NOT NULL,
+	"ip_address" varchar(45),
+	"created_at" timestamp DEFAULT now() NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS "visitor_stats" (
+	"date" varchar(15) PRIMARY KEY NOT NULL,
+	"count" integer DEFAULT 0 NOT NULL
 );
 ```
 
